@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from readthedocs.builds.models import Build, BuildCommandResult, Version
 from readthedocs.projects.models import Project
+from readthedocs.oauth.models import (GithubOrganization, GithubProject,
+                                      BitbucketTeam, BitbucketProject)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -63,3 +65,39 @@ class SearchIndexSerializer(serializers.Serializer):
     project = serializers.CharField(max_length=500, required=False)
     version = serializers.CharField(max_length=500, required=False)
     page = serializers.CharField(max_length=500, required=False)
+
+
+class GithubOrganizationSerializer(serializers.ModelSerializer):
+
+    avatar_url = serializers.ReadOnlyField()
+
+    class Meta:
+        model = GithubOrganization
+        exclude = ('json', 'email', 'users')
+
+
+class GithubProjectSerializer(serializers.ModelSerializer):
+
+    """Github project serializer"""
+
+    private = serializers.ReadOnlyField(source='is_private')
+    owner = serializers.ReadOnlyField()
+    organization = GithubOrganizationSerializer()
+
+    class Meta:
+        model = GithubProject
+        exclude = ('json', 'users')
+
+
+class BitbucketTeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BitbucketTeam
+        exclude = ('json',)
+
+
+class BitbucketProjectSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BitbucketProject
+        exclude = ('json',)

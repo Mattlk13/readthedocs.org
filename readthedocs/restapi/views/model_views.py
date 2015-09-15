@@ -11,6 +11,8 @@ from readthedocs.builds.filters import VersionFilter
 from readthedocs.builds.models import Build, BuildCommandResult, Version
 from readthedocs.core.utils import trigger_build
 from readthedocs.oauth import utils as oauth_utils
+from readthedocs.oauth.models import (GithubOrganization, GithubProject,
+                                      BitbucketTeam, BitbucketProject)
 from readthedocs.builds.constants import STABLE
 from readthedocs.projects.filters import ProjectFilter
 from readthedocs.projects.models import Project, EmailHook
@@ -20,7 +22,9 @@ from ..permissions import (APIPermission, APIRestrictedPermission,
                            RelatedProjectIsOwner)
 from ..serializers import (BuildSerializerFull, BuildSerializer,
                            BuildCommandSerializer, ProjectSerializer,
-                           VersionSerializer)
+                           VersionSerializer, GithubOrganizationSerializer,
+                           GithubProjectSerializer, BitbucketTeamSerializer,
+                           BitbucketProjectSerializer)
 from .. import utils as api_utils
 
 log = logging.getLogger(__name__)
@@ -208,3 +212,47 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         for the currently authenticated user.
         """
         return self.model.objects.api(self.request.user)
+
+
+class OAuthServiceMixin(object):
+    def get_queryset(self):
+        # return self.model.objects.api(self.request.user)
+        return self.model.objects.filter(users=self.request.user)
+
+
+class GithubOrganizationViewSet(OAuthServiceMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = [APIPermission]
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    serializer_class = GithubOrganizationSerializer
+    model = GithubOrganization
+
+
+class GithubProjectViewSet(OAuthServiceMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = [APIPermission]
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    serializer_class = GithubProjectSerializer
+    model = GithubProject
+
+    def get_queryset(self):
+        query = super(GithubProjectViewSet, self).get_queryset()
+        org = self.request.query_params.get('org', None)
+        if org is not None:
+            query = query.filter(organization__pk=org)
+        return query
+
+    def get_paginate_by(self):
+        return self.request.query_params.get('page_size', 25)
+
+
+class BitbucketProjectViewSet(OAuthServiceMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = [APIPermission]
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    serializer_class = BitbucketProjectSerializer
+    model = BitbucketProject
+
+
+class BitbucketTeamViewSet(OAuthServiceMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = [APIPermission]
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    serializer_class = BitbucketTeamSerializer
+    model = BitbucketTeam
