@@ -4,9 +4,8 @@ from rest_framework import routers
 
 from .views.model_views import (BuildViewSet, BuildCommandViewSet,
                                 ProjectViewSet, NotificationViewSet,
-                                VersionViewSet, GithubOrganizationViewSet,
-                                GithubProjectViewSet, BitbucketTeamViewSet,
-                                BitbucketProjectViewSet)
+                                VersionViewSet, OAuthOrganizationViewSet,
+                                OAuthRepositoryViewSet)
 from readthedocs.comments.views import CommentViewSet
 
 router = routers.DefaultRouter()
@@ -15,10 +14,8 @@ router.register(r'command', BuildCommandViewSet)
 router.register(r'version', VersionViewSet)
 router.register(r'project', ProjectViewSet)
 router.register(r'notification', NotificationViewSet)
-router.register(r'github/org', GithubOrganizationViewSet)
-router.register(r'github/project', GithubProjectViewSet)
-router.register(r'bitbucket/team', BitbucketTeamViewSet)
-router.register(r'bitbucket/project', BitbucketProjectViewSet)
+router.register(r'oauth/org', OAuthOrganizationViewSet)
+router.register(r'oauth/repo', OAuthRepositoryViewSet)
 router.register(r'comments', CommentViewSet, base_name="comments")
 
 urlpatterns = patterns(
