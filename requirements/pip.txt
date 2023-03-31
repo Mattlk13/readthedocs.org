@@ -22,7 +22,7 @@ slumber==0.6.0
 lxml==3.3.5
 
 # Basic tools
-redis==2.7.1
+redis==4.4.4
 hiredis==0.1.2
 celery==3.1.18
 django-celery==3.1.16
